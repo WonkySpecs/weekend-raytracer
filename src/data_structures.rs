@@ -134,10 +134,10 @@ impl Vec3 {
                 self.v[2] / self.len()]
         }
     }
+}
 
-    fn colour_range_map(c: &f64) -> i32 {
-        (c * 255.99) as i32
-    }
+fn colour_range_map(c: &f64) -> i32 {
+    (c * 255.99) as i32
 }
 
 pub struct Ray {
