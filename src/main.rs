@@ -36,6 +36,106 @@ impl Vec3 {
         assert_eq!(v.len(), 3);
         [v[0], v[1], v[2]]
     }
+
+    fn vec_add(&self, other: Vec3) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] + other.v[0],
+                self.v[1] + other.v[1],
+                self.v[2] + other.v[2]]
+        }
+    }
+
+    fn scalar_add(&self, other: f64) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] + other,
+                self.v[1] + other,
+                self.v[2] + other]
+        }
+    }
+
+    fn vec_sub(&self, other: Vec3) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] - other.v[0],
+                self.v[1] - other.v[1],
+                self.v[2] - other.v[2]]
+        }
+    }
+
+    fn scalar_sub(&self, other: f64) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] - other,
+                self.v[1] - other,
+                self.v[2] - other]
+        }
+    }
+
+    fn inverse(&self) -> Vec3 {
+        Vec3 {
+            v: [-self.v[0],
+                -self.v[1],
+                -self.v[2]]
+        }
+    }
+
+    fn vec_mult(&self, other: Vec3) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] * other.v[0],
+                self.v[1] * other.v[1],
+                self.v[2] * other.v[2]]
+        }
+    }
+
+    fn scalar_mult(&self, t: f64) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] * t,
+                self.v[1] * t,
+                self.v[2] * t]
+        }
+    }
+
+    fn vec_div(&self, other: Vec3) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] / other.v[0],
+                self.v[1] / other.v[1],
+                self.v[2] / other.v[2]]
+        }
+    }
+
+    fn scalar_div(&self, t: f64) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] / t,
+                self.v[1] / t,
+                self.v[2] / t]
+        }
+    }
+
+    fn dot(&self, other: Vec3) -> f64 {
+        self.v[0] * other.v[0] + self.v[1] * other.v[1] + self.v[2] * other.v[2]
+    }
+
+    fn cross(&self, other: Vec3) -> Vec3 {
+        Vec3 {
+            v: [self.v[1] * other.v[2] - self.v[2] * other.v[1],
+                -(self.v[0] * other.v[2] - self.v[2] * other.v[0]),
+                self.v[0] * other.v[1] - self.v[1] * other.v[2]]
+        }
+    }
+
+    fn len(&self) -> f64 {
+        (self.v[0] * self.v[0] + self.v[1] * self.v[1] + self.v[2] * self.v[2]).sqrt()
+    }
+
+    fn len_squared(&self) -> f64 {
+        self.v[0] * self.v[0] + self.v[1] * self.v[1] + self.v[2] * self.v[2]
+    }
+
+    fn unit_vec(&self) -> Vec3 {
+        Vec3 {
+            v: [self.v[0] / self.len(),
+                self.v[1] / self.len(),
+                self.v[2] / self.len()]
+        }
+    }
 }
 
 fn main() {
