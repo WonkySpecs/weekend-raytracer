@@ -140,3 +140,13 @@ impl Vec3 {
     }
 }
 
+pub struct Ray {
+    pub origin: Vec3,
+    pub direction: Vec3
+}
+
+impl Ray {
+    pub fn at_param(&self, t: f64) -> Vec3 {
+        self.origin.vec_add(self.direction.scalar_mult(t))
+    }
+}
