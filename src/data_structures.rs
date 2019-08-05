@@ -36,7 +36,7 @@ impl Vec3 {
         [v[0], v[1], v[2]]
     }
 
-    pub fn vec_add(&self, other: Vec3) -> Vec3 {
+    pub fn vec_add(&self, other: &Vec3) -> Vec3 {
         Vec3 {
             v: [self.v[0] + other.v[0],
                 self.v[1] + other.v[1],
@@ -52,7 +52,7 @@ impl Vec3 {
         }
     }
 
-    pub fn vec_sub(&self, other: Vec3) -> Vec3 {
+    pub fn vec_sub(&self, other: &Vec3) -> Vec3 {
         Vec3 {
             v: [self.v[0] - other.v[0],
                 self.v[1] - other.v[1],
@@ -76,7 +76,7 @@ impl Vec3 {
         }
     }
 
-    pub fn vec_mult(&self, other: Vec3) -> Vec3 {
+    pub fn vec_mult(&self, other: &Vec3) -> Vec3 {
         Vec3 {
             v: [self.v[0] * other.v[0],
                 self.v[1] * other.v[1],
@@ -92,7 +92,7 @@ impl Vec3 {
         }
     }
 
-    pub fn vec_div(&self, other: Vec3) -> Vec3 {
+    pub fn vec_div(&self, other: &Vec3) -> Vec3 {
         Vec3 {
             v: [self.v[0] / other.v[0],
                 self.v[1] / other.v[1],
@@ -108,11 +108,11 @@ impl Vec3 {
         }
     }
 
-    pub fn dot(&self, other: Vec3) -> f64 {
+    pub fn dot(&self, other: &Vec3) -> f64 {
         self.v[0] * other.v[0] + self.v[1] * other.v[1] + self.v[2] * other.v[2]
     }
 
-    pub fn cross(&self, other: Vec3) -> Vec3 {
+    pub fn cross(&self, other: &Vec3) -> Vec3 {
         Vec3 {
             v: [self.v[1] * other.v[2] - self.v[2] * other.v[1],
                 -(self.v[0] * other.v[2] - self.v[2] * other.v[0]),
@@ -148,7 +148,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn at_param(&self, t: f64) -> Vec3 {
-        self.origin.vec_add(self.direction.scalar_mult(t))
+        self.origin.vec_add(&self.direction.scalar_mult(t))
     }
 }
 
