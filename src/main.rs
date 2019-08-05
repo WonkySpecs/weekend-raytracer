@@ -1,7 +1,10 @@
 use std::fs;
-use data_structures::{Vec3, Ray, Sphere, Hitable};
+use data_structures::{Vec3, Ray, Sphere, Hitable, Hit, World};
 
 mod data_structures;
+
+const T_MIN: f64 = 0.1;
+const T_MAX: f64 = 10.0;
 
 fn main() {
     let width = 200;
@@ -11,10 +14,7 @@ fn main() {
     let lower_left = Vec3 { v: [-2.0, -1.0, -1.0] };
     let horizontal = Vec3 { v: [4.0, 0.0, 0.0] };
     let vertical = Vec3 { v: [0.0, 2.0, 0.0] };
-    let sphere = Sphere {
-        center: Vec3 { v: [0.0, 0.0, -1.0]},
-        r: 0.5
-    };
+    let world = setup_world();
     for j in (0..height).rev() {
         for i in 0..width {
             let u: f64 = i as f64 / width as f64;
@@ -25,7 +25,7 @@ fn main() {
                     .vec_add(&vertical.scalar_mult(v))
                     .vec_add(&horizontal.scalar_mult(u)),
             };
-            let c = color(&r, &sphere).convert_to_ints();
+            let c = color(&r, &world).convert_to_ints();
             content += &format!("{} {} {} ",
                                 c[0],
                                 c[1],
@@ -36,12 +36,55 @@ fn main() {
     fs::write("out.ppm", content);
 }
 
-fn color(ray: &Ray, sphere: &Sphere) -> Vec3 {
-    if let Some(hit) = sphere.get_hit(&ray, 0.1, 10.0) {
-        return hit.normal.scalar_add(1.0).scalar_mult(0.5)
+fn color(ray: &Ray, world: &World) -> Vec3 {
+    if let Some(hit) = closest_collision(ray, world) {
+        return hit.normal.scalar_add(1.0).scalar_mult(0.5);
     }
     let unit_direction = ray.direction.unit_vec();
     let t = 0.5 * (unit_direction.y() + 1.0);
     Vec3 { v: [1.0, 1.0, 1.0] }.scalar_mult(1.0 - t)
-        .vec_add(&Vec3 { v: [0.5, 0.7, 1.0] }.scalar_mult(t))
+        .vec_add(&Vec3 { v: [0.3, 0.5, 1.0] }.scalar_mult(t))
+}
+
+fn closest_collision(ray: &Ray, world: &World) -> Option<Hit> {
+    world.objects.iter()
+        .map(|o| o.get_hit(&ray, T_MIN, T_MAX))
+        .filter(|h| h.is_some())
+        .map(|h| h.unwrap())
+        .max_by(|h1, h2| h2.t.partial_cmp(&h1.t).unwrap())
+}
+
+fn setup_world() -> World {
+    let head = Sphere {
+        center: Vec3 { v: [0.0, 0.0, -1.0] },
+        r: 0.6,
+    };
+    let left_ear = Sphere {
+        center: Vec3 { v: [-0.375, 0.375, -1.1] },
+        r: 0.35,
+    };
+    let right_ear = Sphere {
+        center: Vec3 { v: [0.375, 0.375, -1.1] },
+        r: 0.35,
+    };
+    let left_eye = Sphere {
+        center: Vec3 { v: [-0.12, 0.12, -0.5] },
+        r: 0.13,
+    };
+    let right_eye = Sphere {
+        center: Vec3 { v: [0.12, 0.12, -0.5] },
+        r: 0.13,
+    };
+    let nose = Sphere {
+        center: Vec3 { v: [0.0, -0.04, -0.48] },
+        r: 0.1,
+    };
+    World {
+        objects: vec!(Box::new(head),
+                      Box::new(left_ear),
+                      Box::new(right_ear),
+                      Box::new(left_eye),
+                      Box::new(right_eye),
+                      Box::new(nose))
+    }
 }

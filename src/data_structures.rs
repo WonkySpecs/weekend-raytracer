@@ -201,3 +201,7 @@ impl Hitable for Sphere {
         Option::None
     }
 }
+
+pub struct World {
+    pub objects: Vec<Box<dyn Hitable>>
+}
