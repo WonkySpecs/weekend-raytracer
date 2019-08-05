@@ -151,3 +151,8 @@ impl Ray {
         self.origin.vec_add(self.direction.scalar_mult(t))
     }
 }
+
+pub struct Sphere {
+    pub center: Vec3,
+    pub r: f64
+}
