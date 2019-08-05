@@ -1,5 +1,5 @@
 use std::fs;
-use data_structures::{Vec3, Ray, Sphere};
+use data_structures::{Vec3, Ray, Sphere, Hitable};
 
 mod data_structures;
 
@@ -37,25 +37,11 @@ fn main() {
 }
 
 fn color(ray: &Ray, sphere: &Sphere) -> Vec3 {
-    if let Some(t) = collision_at(ray, sphere) {
-        let normal = ray.at_param(t).vec_sub(&sphere.center).unit_vec();
-        return normal.scalar_add(1.0).scalar_mult(0.5)
+    if let Some(hit) = sphere.get_hit(&ray, 0.1, 10.0) {
+        return hit.normal.scalar_add(1.0).scalar_mult(0.5)
     }
     let unit_direction = ray.direction.unit_vec();
     let t = 0.5 * (unit_direction.y() + 1.0);
     Vec3 { v: [1.0, 1.0, 1.0] }.scalar_mult(1.0 - t)
         .vec_add(&Vec3 { v: [0.5, 0.7, 1.0] }.scalar_mult(t))
-}
-
-fn collision_at(ray: &Ray, sphere: &Sphere) -> Option<f64> {
-    let to_center = ray.origin.vec_sub(&sphere.center);
-    let a = ray.direction.dot(&ray.direction);
-    let b = 2.0 * to_center.dot(&ray.direction);
-    let c = to_center.dot(&to_center) - sphere.r * sphere.r;
-    let discriminant = b * b - 4.0 * a * c;
-    if discriminant > 0.0 {
-        Option::Some((-b - discriminant.sqrt()) / (2.0 * a))
-    } else {
-        Option::None
-    }
 }

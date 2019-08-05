@@ -152,7 +152,52 @@ impl Ray {
     }
 }
 
+pub struct Hit {
+    pub t: f64,
+    pub p: Vec3,
+    pub normal: Vec3
+}
+
+pub trait Hitable {
+    fn get_hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit>;
+}
+
 pub struct Sphere {
     pub center: Vec3,
     pub r: f64
+}
+
+impl Hitable for Sphere {
+    fn get_hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
+        let to_center = ray.origin.vec_sub(&self.center);
+        let a = ray.direction.dot(&ray.direction);
+        let b = 2.0 * to_center.dot(&ray.direction);
+        let c = to_center.dot(&to_center) - self.r * self.r;
+        let discriminant = b * b - 4.0 * a * c;
+        if discriminant > 0.0 {
+            let root = (-b - discriminant.sqrt()) / (2.0 * a);
+            if root > t_min && root < t_max {
+                let hit_point = ray.at_param(root);
+                return Option::Some(
+                    Hit {
+                        t: root,
+                        p: hit_point,
+                        normal: hit_point.vec_sub(&self.center).scalar_div(self.r)
+                    }
+                )
+            }
+            let root = (-b + discriminant.sqrt()) / (2.0 * a);
+            if root > t_min && root < t_max {
+                let hit_point = ray.at_param(root);
+                return Option::Some(
+                    Hit {
+                        t: root,
+                        p: hit_point,
+                        normal: hit_point.vec_sub(&self.center).scalar_div(self.r)
+                    }
+                )
+            }
+        }
+        Option::None
+    }
 }
