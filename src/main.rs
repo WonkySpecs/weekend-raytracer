@@ -9,6 +9,7 @@ mod data_structures;
 
 const T_MIN: f64 = 0.1;
 const T_MAX: f64 = 10.0;
+const RAYS_PER_PIXEL: i32 = 10;
 
 fn main() {
     let width = 200;
@@ -19,17 +20,24 @@ fn main() {
     let horizontal = Vec3 { v: [4.0, 0.0, 0.0] };
     let vertical = Vec3 { v: [0.0, 2.0, 0.0] };
     let world = setup_world();
+    let mut rng = rand::thread_rng();
     for j in (0..height).rev() {
         for i in 0..width {
-            let u: f64 = i as f64 / width as f64;
-            let v: f64 = j as f64 / height as f64;
-            let r = Ray {
-                origin,
-                direction: lower_left
-                    .vec_add(&vertical.scalar_mult(v))
-                    .vec_add(&horizontal.scalar_mult(u)),
-            };
-            let c = color(&r, &world).convert_to_ints();
+            let mut tot_color = Vec3 { v: [0.0, 0.0, 0.0] };
+            for _ in 0..RAYS_PER_PIXEL {
+                let u: f64 = (i as f64 + rng.gen::<f64>()) / width as f64;
+                let v: f64 = (j as f64 + rng.gen::<f64>()) / height as f64;
+                let r = Ray {
+                    origin,
+                    direction: lower_left
+                        .vec_add(&vertical.scalar_mult(v))
+                        .vec_add(&horizontal.scalar_mult(u)),
+                };
+                let c = color(&r, &world);
+                tot_color = tot_color.vec_add(&c);
+            }
+
+            let c = tot_color.scalar_div(RAYS_PER_PIXEL as f64).convert_to_ints();
             content += &format!("{} {} {} ",
                                 c[0],
                                 c[1],
