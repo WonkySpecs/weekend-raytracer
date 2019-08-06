@@ -7,9 +7,9 @@ use data_structures::{Vec3, Ray, Sphere, Hitable, Hit, World};
 
 mod data_structures;
 
-const T_MIN: f64 = 0.1;
-const T_MAX: f64 = 10.0;
-const RAYS_PER_PIXEL: i32 = 10;
+const T_MIN: f64 = 0.0001;
+const T_MAX: f64 = 100.0;
+const RAYS_PER_PIXEL: i32 = 25;
 
 fn main() {
     let width = 200;
@@ -37,7 +37,9 @@ fn main() {
                 tot_color = tot_color.vec_add(&c);
             }
 
-            let c = tot_color.scalar_div(RAYS_PER_PIXEL as f64).convert_to_ints();
+            let c = tot_color.scalar_div(RAYS_PER_PIXEL as f64);
+            let gamma_corrected = Vec3 { v: [c.r().sqrt(), c.g().sqrt(), c.b().sqrt()] };
+            let c = gamma_corrected.convert_to_ints();
             content += &format!("{} {} {} ",
                                 c[0],
                                 c[1],
@@ -50,7 +52,14 @@ fn main() {
 
 fn color(ray: &Ray, world: &World) -> Vec3 {
     if let Some(hit) = closest_collision(ray, world) {
-        return hit.normal.scalar_add(1.0).scalar_mult(0.5);
+        let bounce =
+            hit.normal
+                .vec_add(&hit.p)
+                .vec_add(&rand_point_in_unit_sphere());
+        return color(
+            &Ray { origin: hit.p, direction: bounce.vec_sub(&hit.p) },
+            world)
+            .scalar_mult(0.5);
     }
     let unit_direction = ray.direction.unit_vec();
     let t = 0.5 * (unit_direction.y() + 1.0);
@@ -67,36 +76,29 @@ fn closest_collision(ray: &Ray, world: &World) -> Option<Hit> {
 }
 
 fn setup_world() -> World {
-    let head = Sphere {
+    let base = Sphere {
+        center: Vec3 { v: [0.0, -100.5, -1.0] },
+        r: 100.0,
+    };
+    let s = Sphere {
         center: Vec3 { v: [0.0, 0.0, -1.0] },
-        r: 0.6,
+        r: 0.5,
     };
-    let left_ear = Sphere {
-        center: Vec3 { v: [-0.375, 0.375, -1.1] },
-        r: 0.35,
-    };
-    let right_ear = Sphere {
-        center: Vec3 { v: [0.375, 0.375, -1.1] },
-        r: 0.35,
-    };
-    let left_eye = Sphere {
-        center: Vec3 { v: [-0.12, 0.12, -0.5] },
-        r: 0.13,
-    };
-    let right_eye = Sphere {
-        center: Vec3 { v: [0.12, 0.12, -0.5] },
-        r: 0.13,
-    };
-    let nose = Sphere {
-        center: Vec3 { v: [0.0, -0.04, -0.48] },
-        r: 0.1,
-    };
+
     World {
-        objects: vec!(Box::new(head),
-                      Box::new(left_ear),
-                      Box::new(right_ear),
-                      Box::new(left_eye),
-                      Box::new(right_eye),
-                      Box::new(nose))
+        objects: vec!(Box::new(base),
+                      Box::new(s))
     }
+}
+
+fn rand_point_in_unit_sphere() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    let i_vec = Vec3 { v: [1.0, 1.0, 1.0] };
+    let mut p = Vec3 { v: [1.0, 1.0, 1.0] };
+    while p.len_squared() > 1.0 {
+        p = Vec3 {
+            v: [rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()]
+        }.scalar_mult(2.0).vec_sub(&i_vec);
+    }
+    p
 }
