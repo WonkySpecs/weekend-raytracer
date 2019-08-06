@@ -1,4 +1,8 @@
+extern crate rand;
+
 use std::fs;
+use rand::Rng;
+
 use data_structures::{Vec3, Ray, Sphere, Hitable, Hit, World};
 
 mod data_structures;
